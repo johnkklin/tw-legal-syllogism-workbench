@@ -1,0 +1,26 @@
+# 環境變數與私密金鑰（絕對不可上傳！）
+.env
+.env.*
+!.env.example
+
+# Python 快取與虛擬環境
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# 產出之法律意見書
+outputs/
+法務意見書_*.md
+法務意見書_*.txt
+
+# 忽略一鍵下載之全國法規 (moj_*.json) 與個人擴充資料，僅保留公開測試範例 (sample_*.json)
+law_db/*.json
+law_db/**/*.json
+!law_db/sample_*.json
+!law_db/**/sample_*.json
+
+# 作業系統雜項
+.DS_Store
+Thumbs.db

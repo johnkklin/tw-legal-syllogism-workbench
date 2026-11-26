@@ -142,6 +142,42 @@ pip install twlegalrag
 
 ---
 
+## 📱 進階選配：手機遠端操作與生物辨識秒登指南（Cloudflare Tunnel）
+
+本工具預設綁定 `127.0.0.1:8085` 僅限電腦本機存取，以避免區網明文側錄。若希望在外出時透過 **iOS / Android 手機瀏覽器**安全連回家裡電腦操作，並啟用「Face ID／指紋辨識自動秒登」，建議搭配 **Cloudflare Tunnel**（或 Tailscale）建立 HTTPS 加密通道。
+
+> **為什麼需要透過 HTTPS 連線？**
+> iOS Safari 與 Android Chrome 基於系統安全機制，通常僅在 `https://` 加密網址下才會觸發密碼管理員的生物辨識自動填入功能；使用 Cloudflare Tunnel 可免費取得 HTTPS 憑證，且無須在路由器開放 Port Forwarding。
+
+### 步驟一：建立 Cloudflare Tunnel 加密通道
+
+1. 於電腦安裝 [Cloudflare `cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)。
+2. 先照常啟動本系統（`python legal_inquiry.py`，確認監聽於 `127.0.0.1:8085`）。
+3. 依使用習慣選擇以下任一種通道模式：
+   * **快速測試（免註冊、免網域，每次重啟網址會變動）**：
+     ```bash
+     cloudflared tunnel --url [http://127.0.0.1:8085](http://127.0.0.1:8085)
+     ```
+     終端機將會產生一組臨時的 `https://xxxx.trycloudflare.com` 網址，手機開啟即可操作。
+   * **長期使用（推薦：綁定固定子網域）**：
+     透過 Cloudflare Zero Trust 後台建立 Named Tunnel 並將固定網址（例如 `https://legal.你的網域.com`）指向 `http://127.0.0.1:8085`，才能讓手機密碼管理員永久記住該網址的金鑰。
+
+### 步驟二：將 Gemini API Key 存入密碼管理員
+
+本系統登入模組（`auth_engine.py`）已內建標準登入表單結構與自動送出腳本，支援 **Apple「密碼」App（iOS / macOS Face ID、Touch ID）**、**Google 密碼管理工具 / Samsung Pass（Android 指紋、臉部辨識）**，以及 **1Password / Bitwarden** 等跨平台工具：
+
+1. 在手機或瀏覽器的密碼管理員中，為你的遠端網址新增一筆登入項目：
+   * **網站（Website）**：填入你的 Cloudflare `https://...` 固定網址。
+   * **使用者名稱（Username）**：隨意填寫即可（例如 `gemini` 或 `legal`，系統已內建隱藏帳號欄供密碼管理員辨識）。
+   * **密碼（Password）**：貼上你的 **39 碼 Google Gemini API Key**（或 53 碼自訂代理金鑰）。
+2. 下次以手機打開網頁時，輕觸「Gemini API Key」輸入框並透過 **Face ID 或指紋辨識**帶入密碼；系統偵測到有效長度後會**自動觸發登入**，並於送出後 350 毫秒內主動抹除前端瀏覽器 DOM 中的金鑰殘留。
+
+> **🛡️ 重要資安提醒（強烈建議）**
+> 本系統登入頁雖採自帶金鑰（BYOK）設計，但若你的本地 `./law_db` 放有個人整理的專屬函釋或 `./law_db/案例事實` 存有敏感卷證，公開網址理論上仍可能被取得網址且自備 Gemini Key 的陌生人嘗試存取。
+> **若欲開啟遠端連線，務必在 Cloudflare Zero Trust 後台為該網域啟用 `Cloudflare Access`（設定僅限自己的 Email OTP 或 Google 帳號登入白名單），或改用純內網加密的 `Tailscale` 連線，確保個人卷證絕不外洩。**
+
+---
+
 ## 📜 開源授權 (License)
 
 本專案程式碼採用 [MIT License](./LICENSE) 授權釋出；透過 `download_moj_laws.py` 下載之全國法規資料來源為中華民國法務部全國法規資料庫（依政府資料開放授權條款－第 1 版提供，且依《著作權法》第 9 條法規本文不受著作權限制）。

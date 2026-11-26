@@ -83,7 +83,7 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 
-# 選用（強烈推薦）：從法務部開放資料一鍵建置全國現行憲法與法律庫
+# 選用（推薦）：從法務部開放資料一鍵建置全國現行憲法與法律庫
 python download_moj_laws.py
 # 若想連同數千筆行政機關「法規命令」一併下載，可加上 --with-orders：
 # python download_moj_laws.py --with-orders
